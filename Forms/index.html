@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Solicitação de Chips</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <style>
+    .scrollbar::-webkit-scrollbar {
+      width: 8px;
+    }
+    .scrollbar::-webkit-scrollbar-thumb {
+      background-color: #888;
+      border-radius: 4px;
+    }
+    .scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-6">
+
+  <div class="bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row w-full max-w-6xl overflow-hidden">
+
+    <!-- Imagem -->
+    <div class="flex items-center justify-center p-6 bg-gray-200">
+      <img src="file:///C:/Users/patricia.souza/Downloads/undraw_order-confirmed_m9e9%20(1).svg" alt="Imagem Confirmação" class="max-h-[500px] w-auto">
+    </div>
+
+    <!-- Formulário -->
+    <div class="flex-1 p-8 overflow-y-auto scrollbar" style="max-height: 90vh;">
+      <h2 class="text-3xl font-bold text-center mb-6">Solicitação de Chips</h2>
+      <form id="chipForm" class="space-y-4">
+
+        <div>
+          <label class="block font-semibold">Data e Hora</label>
+          <input type="text" id="datetime" name="datetime" class="w-full border rounded p-2" readonly>
+        </div>
+
+        <div>
+          <label class="block font-semibold">Nome Completo</label>
+          <input type="text" name="nome" class="w-full border rounded p-2" required>
+        </div>
+
+        <div>
+          <label class="block font-semibold">E-mail</label>
+          <input type="email" name="email" class="w-full border rounded p-2" required>
+        </div>
+
+        <div>
+          <label class="block font-semibold">MVNO</label>
+          <input type="text" name="mvno" class="w-full border rounded p-2" required>
+        </div>
+
+        <div>
+          <label class="block font-semibold">Quantidade</label>
+          <input type="number" name="quantidade" class="w-full border rounded p-2" required>
+        </div>
+
+        <div>
+          <label class="block font-semibold">Tipo de Solicitação</label>
+          <select name="tipoSolicitacao" class="w-full border rounded p-2" required>
+            <option>Compra</option>
+            <option>Venda</option>
+            <option>Abastecimento</option>
+            <option>Doação</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold">Centro de Custo</label>
+          <select name="centroCusto" class="w-full border rounded p-2" required>
+            <option>1010030 - Logística</option>
+            <option>1010005 - Retail (MVNOs/ISP)</option>
+            <option>1010004 - Wholesale</option>
+            <option>1010007 - Correios</option>
+            <option>1010018 - Marketing</option>
+            <option>1010012 - DP / RH</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold">Tipo Fiscal</label>
+          <select name="tipoFiscal" class="w-full border rounded p-2" required>
+            <option>Revenda</option>
+            <option>Insumo</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold">Tipo de Chip</label>
+          <select name="tipoChip" class="w-full border rounded p-2" required>
+            <option>Físico</option>
+            <option>Virtual</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold">Plano</label>
+          <input type="text" name="plano" class="w-full border rounded p-2">
+        </div>
+
+        <div>
+          <label class="block font-semibold">Código do Plano</label>
+          <input type="text" name="codigoPlano" class="w-full border rounded p-2">
+        </div>
+
+        <div>
+          <label class="block font-semibold">NoSource</label>
+          <select name="noSource" class="w-full border rounded p-2" required>
+            <option>A Vender</option>
+            <option>A Faturar</option>
+            <option>A Faturar Não Telecom</option>
+            <option>Bonificação</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold">CNPJ</label>
+          <input type="text" name="cnpj" class="w-full border rounded p-2" pattern="\d*" maxlength="14">
+        </div>
+
+        <div>
+          <label class="block font-semibold">Observações</label>
+          <textarea name="observacoes" class="w-full border rounded p-2"></textarea>
+        </div>
+
+        <div>
+          <label class="block font-semibold">Anexar Arquivo (.inp, .json, .cdr, etc)</label>
+          <input type="file" id="fileInput" name="arquivo" class="w-full border rounded p-2" accept=".inp,.json,.cdr" multiple>
+          <ul id="fileList" class="mt-2 text-sm text-gray-600"></ul>
+        </div>
+
+        <div class="text-center">
+          <button type="submit" class="mt-4 px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Enviar Solicitação</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <script>
+  document.getElementById('datetime').value = new Date().toLocaleString('pt-BR');
+
+  document.getElementById('chipForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const formData = new FormData(this);
+    const data = {};
+
+    formData.forEach((value, key) => {
+      data[key] = value;
+    });
+
+    fetch('URL_DO_SEU_FLUXO', { // <-- Cole o link do seu Power Automate aqui
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => {
+      if (response.ok) {
+        alert('Solicitação enviada com sucesso para o Excel Online via Power Automate!');
+        this.reset();
+        document.getElementById('datetime').value = new Date().toLocaleString('pt-BR');
+        document.getElementById('fileList').innerHTML = '';
+      } else {
+        alert('Erro ao enviar!');
+      }
+    })
+    .catch(error => {
+      alert('Erro: ' + error);
+    });
+  });
+
+  // Pré-visualizar arquivos
+  document.getElementById('fileInput').addEventListener('change', function(event) {
+    const fileList = document.getElementById('fileList');
+    fileList.innerHTML = '';
+
+    for (let i = 0; i < this.files.length; i++) {
+      const file = this.files[i];
+      const listItem = document.createElement('li');
+      listItem.textContent = `${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
+      fileList.appendChild(listItem);
+    }
+  });
+</script>
+
+</body>
+</html>
